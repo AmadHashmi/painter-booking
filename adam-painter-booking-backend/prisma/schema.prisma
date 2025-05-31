@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PAINTER
+  CLIENT
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  password       String
+  name           String
+  role           Role
+  createdAt      DateTime       @default(now())
+
+  // Relations
+  availabilities Availability[] @relation("PainterAvailabilities")
+  painterBookings Booking[]     @relation("PainterBookings") // As Painter
+  clientBookings  Booking[]     @relation("ClientBookings")  // As Client
+}
+
+model Availability {
+  id        String   @id @default(uuid())
+  startTime DateTime
+  endTime   DateTime
+
+  painter   User     @relation("PainterAvailabilities", fields: [painterId], references: [id])
+  painterId String
+}
+
+model Booking {
+  id         String   @id @default(uuid())
+  startTime  DateTime
+  endTime    DateTime
+  status     String
+
+  painter    User     @relation("PainterBookings", fields: [painterId], references: [id])
+  painterId  String
+
+  client     User     @relation("ClientBookings", fields: [clientId], references: [id])
+  clientId   String
+}
