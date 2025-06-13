@@ -23,7 +23,6 @@ export const addAvailability = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid time range." });
     }
 
-    // 🚫 Check for exact match
     const exactMatch = await prisma.availability.findFirst({
       where: {
         painterId,
@@ -38,7 +37,6 @@ export const addAvailability = async (req: Request, res: Response) => {
       });
     }
 
-    // 🚫 Check for overlap
     const overlapping = await prisma.availability.findFirst({
       where: {
         painterId,

@@ -23,7 +23,6 @@ export const addBookingRequest = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Missing client ID from token." });
     }
 
-    // 🚫 Prevent duplicate bookings for the same client in same range
     const existingBooking = await prisma.booking.findFirst({
       where: {
         clientId,
@@ -38,7 +37,6 @@ export const addBookingRequest = async (req: Request, res: Response) => {
         .json({ error: "You already have a booking in this time range." });
     }
 
-    // ✅ Find available painters
     const availableSlots = await prisma.availability.findMany({
       where: {
         startTime: { lte: start },
@@ -66,7 +64,6 @@ export const addBookingRequest = async (req: Request, res: Response) => {
       });
     }
 
-    // ✅ Pick painter with fewest bookings
     const painterBookingCounts = await Promise.all(
       availableSlots.map(async (slot) => {
         const count = await prisma.booking.count({
@@ -84,7 +81,6 @@ export const addBookingRequest = async (req: Request, res: Response) => {
       (a, b) => a.bookingCount - b.bookingCount
     )[0];
 
-    // ✅ Prevent overlapping booking for same painter
     const overlappingPainterBooking = await prisma.booking.findFirst({
       where: {
         painterId: bestPainter.painter.id,
